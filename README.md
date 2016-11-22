@@ -1,7 +1,7 @@
 # nbc
 
 [![Build Status](https://travis-ci.org/SamuelKupferschmid/nbc.svg?branch=master)](https://travis-ci.org/SamuelKupferschmid/nbc)
-[![Coverage Status](https://coveralls.io/repos/github/SamuelKupferschmid/nbc/badge.svg)](https://coveralls.io/github/SamuelKupferschmid/nbc)
+[![Coverage Status](https://coveralls.io/repos/github/SamuelKupferschmid/nbc/badge.svg?branch=develop)](https://coveralls.io/github/SamuelKupferschmid/nbc?branch=develop)
 
 
 **this Code is still under construction and not ready for use!**
