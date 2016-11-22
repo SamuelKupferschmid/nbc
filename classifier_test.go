@@ -40,3 +40,36 @@ func TestSameForValidation(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestTrainWithContentOverlapping(t *testing.T) {
+	d := []LabelItem{
+		LabelItem{
+			Label:   "label1",
+			Content: SplitText("example of label1 test"),
+		},
+		LabelItem{
+			Label:   "label2",
+			Content: SplitText("label2 test example"),
+		},
+	}
+
+	c := &Classifier{}
+
+	c.Train(d)
+
+	m := c.GetMatches(SplitText("label1 example test"))
+
+	if len(m) != 2 {
+		t.Fail()
+	}
+
+	res := m[0]
+
+	if m[0].Probability < m[1].Probability {
+		res = m[1]
+	}
+
+	if res.Label != "label1" {
+		t.Fail()
+	}
+}

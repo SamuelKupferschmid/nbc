@@ -56,6 +56,15 @@ func (c *Classifier) Validate(item []LabelItem) *Performance {
 	return &Performance{Precision: 1, Recall: 1}
 }
 
+func (c *Classifier) GetMatches(content []string) []Match {
+	return nil
+}
+
+type Match struct {
+	Label       string
+	Probability float64
+}
+
 type LabelItem struct {
 	Label   string
 	Content []string
