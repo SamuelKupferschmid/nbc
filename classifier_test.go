@@ -4,29 +4,29 @@ import (
 	"testing"
 )
 
-func TestTrainIncreaseLabelLen(t *testing.T) {
+func TestTrainIncreaseClassesLen(t *testing.T) {
 	c := &Classifier{}
 
-	if len(c.Labels()) != 0 {
+	if len(c.Classes()) != 0 {
 		t.Fail()
 	}
 
-	c.Train([]LabelItem{
-		LabelItem{
-			Label:   "test",
+	c.Train([]ClassItem{
+		ClassItem{
+			Class:   "test",
 			Content: SplitText("test text"),
 		},
 	})
 
-	if len(c.Labels()) != 1 {
+	if len(c.Classes()) != 1 {
 		t.Fail()
 	}
 }
 
 func TestSameForValidation(t *testing.T) {
-	d := []LabelItem{
-		LabelItem{
-			Label:   "test1",
+	d := []ClassItem{
+		ClassItem{
+			Class:   "test1",
 			Content: SplitText("example text"),
 		},
 	}
@@ -42,17 +42,15 @@ func TestSameForValidation(t *testing.T) {
 }
 
 func TestTrainWithContentOverlapping(t *testing.T) {
+	t.SkipNow()
 
-	//TODO not ready yet
-	return
-
-	d := []LabelItem{
-		LabelItem{
-			Label:   "label1",
+	d := []ClassItem{
+		ClassItem{
+			Class:   "label1",
 			Content: SplitText("example of label1 test"),
 		},
-		LabelItem{
-			Label:   "label2",
+		ClassItem{
+			Class:   "label2",
 			Content: SplitText("label2 test example"),
 		},
 	}
@@ -64,7 +62,7 @@ func TestTrainWithContentOverlapping(t *testing.T) {
 	m := c.GetMatches(SplitText("label1 example test"))
 
 	if len(m) != 2 {
-		t.Fail()
+		t.FailNow()
 	}
 
 	res := m[0]
@@ -73,7 +71,7 @@ func TestTrainWithContentOverlapping(t *testing.T) {
 		res = m[1]
 	}
 
-	if res.Label != "label1" {
+	if res.Class != "label1" {
 		t.Fail()
 	}
 }

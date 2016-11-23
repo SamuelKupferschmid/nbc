@@ -4,13 +4,13 @@ type Classifier struct {
 	trainingSet map[string]map[string]float64
 }
 
-func (c *Classifier) Train(items []LabelItem) {
+func (c *Classifier) Train(items []ClassItem) {
 	c.trainingSet = make(map[string]map[string]float64)
 
-	//fill labels and values
+	//fill classes and values
 	for _, val := range items {
-		if _, ok := c.trainingSet[val.Label]; !ok {
-			c.trainingSet[val.Label] = make(map[string]float64)
+		if _, ok := c.trainingSet[val.Class]; !ok {
+			c.trainingSet[val.Class] = make(map[string]float64)
 		}
 	}
 
@@ -24,7 +24,7 @@ func (c *Classifier) Train(items []LabelItem) {
 					c.trainingSet[l][w] = 0
 				}
 
-				if val.Label == l {
+				if val.Class == l {
 					c.trainingSet[l][w]++
 					cnt++
 				}
@@ -35,7 +35,7 @@ func (c *Classifier) Train(items []LabelItem) {
 	//TODO normalization
 }
 
-func (c *Classifier) Labels() []string {
+func (c *Classifier) Classes() []string {
 
 	if c.trainingSet == nil {
 		return []string{}
@@ -52,7 +52,7 @@ func (c *Classifier) Labels() []string {
 	return l
 }
 
-func (c *Classifier) Validate(item []LabelItem) *Performance {
+func (c *Classifier) Validate(item []ClassItem) *Performance {
 	return &Performance{Precision: 1, Recall: 1}
 }
 
@@ -61,11 +61,11 @@ func (c *Classifier) GetMatches(content []string) []Match {
 }
 
 type Match struct {
-	Label       string
+	Class       string
 	Probability float64
 }
 
-type LabelItem struct {
-	Label   string
+type ClassItem struct {
+	Class   string
 	Content []string
 }
