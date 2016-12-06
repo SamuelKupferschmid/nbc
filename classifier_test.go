@@ -23,6 +23,49 @@ func TestTrainIncreaseClassesLen(t *testing.T) {
 	}
 }
 
+func TestNormalizeTrainedData(t *testing.T) {
+	c := &Classifier{}
+
+	c.Train([]ClassItem{
+		ClassItem{
+			Class:   "test",
+			Content: SplitText("test example 1"),
+		},
+		ClassItem{
+			Class:   "test",
+			Content: SplitText("foo example bar"),
+		},
+	})
+
+	if c.trainingSet["test"]["test"] != 0.5 {
+		t.Fail()
+	}
+
+	if c.trainingSet["test"]["example"] != 1 {
+		t.Fail()
+	}
+
+}
+
+func TestClampMissingToMinWeight(t *testing.T) {
+	c := &Classifier{}
+
+	c.Train([]ClassItem{
+		ClassItem{
+			Class:   "foo",
+			Content: SplitText("foo"),
+		},
+		ClassItem{
+			Class:   "bar",
+			Content: SplitText("bar"),
+		},
+	})
+
+	if c.trainingSet["foo"]["bar"] != c.minWeight {
+		t.Fail()
+	}
+}
+
 func TestSameForValidation(t *testing.T) {
 	d := []ClassItem{
 		ClassItem{

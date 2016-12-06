@@ -2,10 +2,13 @@ package nbc
 
 type Classifier struct {
 	trainingSet map[string]map[string]float64
+	minWeight   float64
 }
 
 func (c *Classifier) Train(items []ClassItem) {
 	c.trainingSet = make(map[string]map[string]float64)
+
+	c.minWeight = 0.05
 
 	//fill classes and values
 	for _, val := range items {
@@ -32,7 +35,16 @@ func (c *Classifier) Train(items []ClassItem) {
 		}
 	}
 
-	//TODO normalization
+	for _, d := range c.trainingSet {
+		for i, _ := range d {
+			if d[i] == 0 {
+				//clamp to minWeight to avoid multiply by zero
+				d[i] = c.minWeight
+			} else {
+				d[i] /= float64(len(items))
+			}
+		}
+	}
 }
 
 func (c *Classifier) Classes() []string {
