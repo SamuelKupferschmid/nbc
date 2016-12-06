@@ -23,6 +23,49 @@ func TestTrainIncreaseClassesLen(t *testing.T) {
 	}
 }
 
+func TestNormalizeTrainedData(t *testing.T) {
+	c := &Classifier{}
+
+	c.Train([]ClassItem{
+		ClassItem{
+			Class:   "test",
+			Content: SplitText("test example 1"),
+		},
+		ClassItem{
+			Class:   "test",
+			Content: SplitText("foo example bar"),
+		},
+	})
+
+	if c.trainingSet["test"]["test"] != 0.5 {
+		t.Fail()
+	}
+
+	if c.trainingSet["test"]["example"] != 1 {
+		t.Fail()
+	}
+
+}
+
+func TestClampMissingToMinWeight(t *testing.T) {
+	c := &Classifier{}
+
+	c.Train([]ClassItem{
+		ClassItem{
+			Class:   "foo",
+			Content: SplitText("foo"),
+		},
+		ClassItem{
+			Class:   "bar",
+			Content: SplitText("bar"),
+		},
+	})
+
+	if c.trainingSet["foo"]["bar"] != c.minWeight {
+		t.Fail()
+	}
+}
+
 func TestSameForValidation(t *testing.T) {
 	d := []ClassItem{
 		ClassItem{
@@ -41,17 +84,34 @@ func TestSameForValidation(t *testing.T) {
 	}
 }
 
-func TestTrainWithContentOverlapping(t *testing.T) {
-	t.SkipNow()
-
+func TestFullProbability(t *testing.T) {
 	d := []ClassItem{
 		ClassItem{
-			Class:   "label1",
-			Content: SplitText("example of label1 test"),
+			Class:   "l1",
+			Content: SplitText("1 2 3 4 5"),
 		},
+	}
+
+	c := &Classifier{}
+
+	c.Train(d)
+
+	m := c.GetMatches(SplitText("2 3 4"))
+
+	if m[0].Probability != 1 {
+		t.Fail()
+	}
+}
+
+func TestTrainWithContentOverlapping(t *testing.T) {
+	d := []ClassItem{
 		ClassItem{
 			Class:   "label2",
 			Content: SplitText("label2 test example"),
+		},
+		ClassItem{
+			Class:   "label1",
+			Content: SplitText("example of label1 test"),
 		},
 	}
 
