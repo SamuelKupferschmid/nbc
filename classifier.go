@@ -1,5 +1,9 @@
 package nbc
 
+import (
+	"sort"
+)
+
 type Classifier struct {
 	trainingSet map[string]map[string]float64
 	minWeight   float64
@@ -69,7 +73,36 @@ func (c *Classifier) Validate(item []ClassItem) *Performance {
 }
 
 func (c *Classifier) GetMatches(content []string) []Match {
-	return nil
+	matches := make(Matches, len(c.trainingSet))
+
+	i := 0
+
+	for k, _ := range c.trainingSet {
+		matches[i] = Match{
+			k,
+			1,
+		}
+
+		i++
+	}
+
+	sum := 0.
+
+	for i, _ := range matches {
+		for _, w := range content {
+			matches[i].Probability *= c.trainingSet[matches[i].Class][w]
+		}
+
+		sum += matches[i].Probability
+	}
+
+	for i, _ := range matches {
+		matches[i].Probability /= sum
+	}
+
+	sort.Sort(matches)
+
+	return matches
 }
 
 type Match struct {
@@ -80,4 +113,18 @@ type Match struct {
 type ClassItem struct {
 	Class   string
 	Content []string
+}
+
+type Matches []Match
+
+func (m Matches) Len() int {
+	return len(m)
+}
+
+func (m Matches) Less(i, j int) bool {
+	return m[i].Probability > m[j].Probability
+}
+
+func (m Matches) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
 }

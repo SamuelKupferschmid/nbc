@@ -84,15 +84,34 @@ func TestSameForValidation(t *testing.T) {
 	}
 }
 
+func TestFullProbability(t *testing.T) {
+	d := []ClassItem{
+		ClassItem{
+			Class:   "l1",
+			Content: SplitText("1 2 3 4 5"),
+		},
+	}
+
+	c := &Classifier{}
+
+	c.Train(d)
+
+	m := c.GetMatches(SplitText("2 3 4"))
+
+	if m[0].Probability != 1 {
+		t.Fail()
+	}
+}
+
 func TestTrainWithContentOverlapping(t *testing.T) {
 	d := []ClassItem{
 		ClassItem{
-			Class:   "label1",
-			Content: SplitText("example of label1 test"),
-		},
-		ClassItem{
 			Class:   "label2",
 			Content: SplitText("label2 test example"),
+		},
+		ClassItem{
+			Class:   "label1",
+			Content: SplitText("example of label1 test"),
 		},
 	}
 
@@ -103,7 +122,7 @@ func TestTrainWithContentOverlapping(t *testing.T) {
 	m := c.GetMatches(SplitText("label1 example test"))
 
 	if len(m) != 2 {
-		t.Fail()
+		t.FailNow()
 	}
 
 	res := m[0]
