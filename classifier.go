@@ -68,11 +68,37 @@ func (c *Classifier) Classes() []string {
 	return l
 }
 
-func (c *Classifier) Validate(item []ClassItem) *Performance {
-	return &Performance{Precision: 1, Recall: 1}
+// Validates adjusts the threshold for each labels n times. Where n is given by iterations.
+// It returns an Array of float64 which gives the accuracy between each iteration/adjustmens as well as before and after the Validation. (len() == iterations + 1)
+func (c *Classifier) Validate(items []ClassItem, iterations int) []float64 {
+	acc := make([]float64, iterations+1)
+
+	for i := 0; i <= iterations; i++ {
+		acc[i] = c.Accuracy(items)
+	}
+
+	return acc
 }
 
-func (c *Classifier) GetMatches(content []string) []Match {
+func (c *Classifier) Accuracy(items []ClassItem) float64 {
+	matches := 0
+
+	for _, iv := range items {
+		m := c.PredictBest(iv.Content)
+
+		if m.Class == iv.Class {
+			matches++
+		}
+	}
+
+	return float64(matches) / float64(len(items))
+}
+
+func (c *Classifier) PredictBest(content []string) Match {
+	return c.PredictAll(content)[0]
+}
+
+func (c *Classifier) PredictAll(content []string) []Match {
 	matches := make(Matches, len(c.trainingSet))
 
 	i := 0

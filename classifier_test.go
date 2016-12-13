@@ -77,9 +77,9 @@ func TestSameForValidation(t *testing.T) {
 	c := &Classifier{}
 
 	c.Train(d)
-	p := c.Validate(d)
+	a := c.Validate(d, 1)
 
-	if p.Precision < 1 || p.Recall < 1 {
+	if a[0] < 1 {
 		t.Fail()
 	}
 }
@@ -96,7 +96,7 @@ func TestFullProbability(t *testing.T) {
 
 	c.Train(d)
 
-	m := c.GetMatches(SplitText("2 3 4"))
+	m := c.PredictAll(SplitText("2 3 4"))
 
 	if m[0].Probability != 1 {
 		t.Fail()
@@ -119,7 +119,7 @@ func TestTrainWithContentOverlapping(t *testing.T) {
 
 	c.Train(d)
 
-	m := c.GetMatches(SplitText("label1 example test"))
+	m := c.PredictAll(SplitText("label1 example test"))
 
 	if len(m) != 2 {
 		t.FailNow()
@@ -132,6 +132,67 @@ func TestTrainWithContentOverlapping(t *testing.T) {
 	}
 
 	if res.Class != "label1" {
+		t.Fail()
+	}
+}
+
+func TestPerformanceOfTrainingSetIsPerfect(t *testing.T) {
+	l1 := "test text 1"
+	l2 := "foo bar"
+
+	d := []ClassItem{
+		ClassItem{
+			Class:   "1",
+			Content: SplitText(l1),
+		},
+		ClassItem{
+			Class:   "2",
+			Content: SplitText(l2),
+		},
+	}
+
+	c := &Classifier{}
+
+	c.Train(d)
+
+	a := c.Accuracy(d)
+
+	if a < 1 {
+		t.Fail()
+	}
+}
+
+func TestPerformanceOf50Percent(t *testing.T) {
+	l1 := "test text 1"
+	l2 := "foo bar"
+
+	d := []ClassItem{
+		ClassItem{
+			Class:   "1",
+			Content: SplitText(l1),
+		},
+		ClassItem{
+			Class:   "2",
+			Content: SplitText(l2),
+		},
+	}
+
+	c := &Classifier{}
+
+	c.Train(d)
+
+	acc := c.Validate([]ClassItem{
+		ClassItem{
+			Class:   "1",
+			Content: SplitText(l1),
+		},
+		ClassItem{
+			Class:   "1",
+			Content: SplitText(l2),
+		},
+	}, 1)
+
+	if acc[0] != 0.5 {
 		t.Fail()
 	}
 }
