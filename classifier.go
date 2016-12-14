@@ -5,19 +5,24 @@ import (
 )
 
 type Classifier struct {
-	trainingSet map[string]map[string]float64
-	minWeight   float64
+	trainingSet    map[string]map[string]float64
+	labelWeights   map[string]float64
+	minWeight      float64
+	validationRate float64
 }
 
 func (c *Classifier) Train(items []ClassItem) {
 	c.trainingSet = make(map[string]map[string]float64)
+	c.labelWeights = make(map[string]float64)
 
 	c.minWeight = 0.05
+	c.validationRate = 0.1
 
 	//fill classes and values
 	for _, val := range items {
 		if _, ok := c.trainingSet[val.Class]; !ok {
 			c.trainingSet[val.Class] = make(map[string]float64)
+			c.labelWeights[val.Class] = 1
 		}
 	}
 
@@ -73,8 +78,33 @@ func (c *Classifier) Classes() []string {
 func (c *Classifier) Validate(items []ClassItem, iterations int) []float64 {
 	acc := make([]float64, iterations+1)
 
-	for i := 0; i <= iterations; i++ {
-		acc[i] = c.Accuracy(items)
+	classErr := make(map[string]float64)
+
+	for w, _ := range c.labelWeights {
+		classErr[w] = 0
+	}
+
+	//find error by items
+	for iter := 0; iter <= iterations; iter++ {
+		for _, item := range items {
+			matches := c.PredictAll(item.Content)
+			for _, m := range matches {
+				if m.Class == item.Class {
+					classErr[item.Class] += matches[0].Probability - m.Probability
+					break
+				}
+			}
+		}
+
+		acc[iter] = c.Accuracy(items)
+
+	}
+
+	//TODO don't just increase weights for false negative but also decrease false positives
+
+	//apply error to weights
+	for l, v := range classErr {
+		c.labelWeights[l] += v * c.validationRate
 	}
 
 	return acc
@@ -116,7 +146,7 @@ func (c *Classifier) PredictAll(content []string) []Match {
 
 	for i, _ := range matches {
 		for _, w := range content {
-			matches[i].Probability *= c.trainingSet[matches[i].Class][w]
+			matches[i].Probability *= c.trainingSet[matches[i].Class][w] * c.labelWeights[matches[i].Class]
 		}
 
 		sum += matches[i].Probability
