@@ -196,3 +196,16 @@ func TestPerformanceOf50Percent(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestAccuracyByZeroItemsGetsPanic(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fail()
+		}
+	}()
+
+	c := &Classifier{}
+	c.Accuracy([]ClassItem{})
+
+}

@@ -111,6 +111,10 @@ func (c *Classifier) Validate(items []ClassItem, iterations int) []float64 {
 }
 
 func (c *Classifier) Accuracy(items []ClassItem) float64 {
+	if len(items) == 0 {
+		panic("at least one item expected")
+	}
+
 	matches := 0
 
 	for _, iv := range items {
